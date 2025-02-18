@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block start %}
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  .text {
+    color: green;
+    font-weight: bold;
+  }
+</style>
+
+<div class="container mt-5">
+
+  <!-- Update User Form -->
+  <form class="col-6 mx-auto card p-3 shadow-lg" method="POST" enctype="multipart/form-data">
+    <a href="/">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </a>
+    
+    {% csrf_token %}
+    <h2 class="text text-center">Users Info</h2>
+    
+    <h3>Update User</h3>
+    <hr>
+    
+    <!-- First Name Field -->
+    <div class="form-group">
+      <label for="first_name">First Name</label>
+      <input name="first_name" value="{{ user.first_name }}" type="text" class="form-control" required>
+    </div>
+
+    <!-- Last Name Field -->
+    <div class="form-group">
+      <label for="last_name">Last Name</label>
+      <input name="last_name" value="{{ user.last_name }}" type="text" class="form-control" required>
+    </div>
+    
+    <!-- User Image Field -->
+    <div class="form-group">
+      <label for="user_image">User Image</label>
+      <input name="user_image" type="file" class="form-control">
+    </div>
+    
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-success">Update User</button>
+  </form>
+</div>
+
+{% endblock %}
