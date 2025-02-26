@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskTrackr</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation Bar -->
+    <nav class="bg-black p-4 text-white">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="{% url 'home' %}" class="text-xl font-bold">TaskTrackr</a>
+            <div class="flex gap-4">
+                <a href="{% url 'home' %}" class="hover:text-gray-200">Home</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="hover:text-gray-200">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="hover:text-gray-200">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="p-6">
+        <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow">
+            <h1 class="text-2xl font-bold mb-4 text-center">TaskTrackr - To-Do List</h1>
+            
+            <form method="post" action="{% url 'add_task' %}" class="mb-4 flex flex-col gap-2">
+                {% csrf_token %}
+                <input type="text" name="task_name" id="taskName" placeholder="Task Name" class="border p-2 w-full" required>
+                <input type="date" name="due_date" id="taskDueDate" class="border p-2 w-full" required>
+                <button type="submit" class="bg-black text-white px-4 py-2 rounded w-full sm:w-auto">Add Task</button>
+            </form>
+            
+            <form method="get" action="{% url 'home' %}" class="mb-4 flex flex-col gap-2">
+                <input type="text" name="search" value="{{ search_query }}" id="searchBar" placeholder="Search tasks..." class="border p-2 w-full sm:w-1/2 mb-2">
+                
+                <div class="flex flex-col sm:flex-row justify-between gap-2">
+                    <select id="taskFilter" name="status" class="border p-2 w-full sm:w-auto">
+                        <option value="all" {% if filter_status == 'all' %}selected{% endif %}>All</option>
+                        <option value="complete" {% if filter_status == 'complete' %}selected{% endif %}>Complete</option>
+                        <option value="incomplete" {% if filter_status == 'incomplete' %}selected{% endif %}>Incomplete</option>
+                    </select>
+                    <button type="submit" class="bg-black text-white px-4 py-2 rounded w-full sm:w-auto">Filter</button>
+                </div>
+            </form>    
+            
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse border text-sm sm:text-base">
+                    <thead>
+                        <tr class="bg-gray-200 text-left">
+                            <th class="border p-2">Task #</th>
+                            <th class="border p-2">Task Name</th>
+                            <th class="border p-2">Due Date</th>
+                            <th class="border p-2">Status</th>
+                            <th class="border p-2">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskList">
+                        {% for task in tasks %}
+                        <tr class="border">
+                            <td class="border p-2">{{ forloop.counter }}</td>
+                            <td class="border p-2">{{ task.task_name }}</td>
+                            <td class="border p-2">{{ task.due_date }}</td>
+                            <td class="border p-2">{{ task.status }}</td>
+                            <td class="border p-2">
+                                <button onclick="openPopup({{ task.id }}, '{{ task.task_name }}', '{{ task.due_date|date:"Y-m-d" }}', '{{ task.status }}')" class="bg-green-500 text-white px-2 py-1 rounded">Edit</button>
+                                <a href="{% url 'delete_task' task.id %}" class="bg-red-500 text-white px-2 py-1 rounded ml-2">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Update Task Popup -->
+    <div id="updatePopup" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 class="text-xl font-bold mb-4 text-center">Update Task</h2>
+            <form id="updateTaskForm" method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" name="task_id" id="updateTaskId">
+                <div class="mb-2">
+                    <label for="updateTaskName" class="block text-sm font-medium text-gray-700">Task Name</label>
+                    <input type="text" name="task_name" id="updateTaskName" class="border p-2 w-full" required>
+                </div>
+                <div class="mb-2">
+                    <label for="updateTaskDueDate" class="block text-sm font-medium text-gray-700">Due Date</label>
+                    <input type="date" name="due_date" id="updateTaskDueDate" class="border p-2 w-full" required>
+                </div>
+                <div class="mb-2">
+                    <label for="updateTaskStatus" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select name="status" id="updateTaskStatus" class="border p-2 w-full">
+                        <option value="Incomplete">Incomplete</option>
+                        <option value="Complete">Complete</option>
+                    </select>
+                </div>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full">Update</button>
+                <button type="button" onclick="closePopup()" class="bg-red-500 text-white px-4 py-2 rounded w-full mt-2">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openPopup(taskId, taskName, dueDate, status) {
+            document.getElementById('updateTaskForm').action = `/update-task/${taskId}/`;
+            document.getElementById('updateTaskId').value = taskId;
+            document.getElementById('updateTaskName').value = taskName;
+            document.getElementById('updateTaskDueDate').value = dueDate;
+            document.getElementById('updateTaskStatus').value = status;
+            document.getElementById('updatePopup').classList.remove('hidden');
+        }
+
+        function closePopup() {
+            document.getElementById('updatePopup').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

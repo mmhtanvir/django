@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .full-height {
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center full-height">
+        <form class="col-md-6 col-lg-4 card p-4 shadow-lg text-center" method="post" enctype="multipart/form-data">
+            <h1><span style="color: rgb(42, 28, 92);">TaskTrackr</span></h1>
+
+            {% csrf_token %}
+
+            <h3>Login</h3>
+            <hr>
+
+            {% if messages %}
+            <div class="alert alert-primary" role="alert">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group text-left">
+                <label for="exampleInputEmail1">Username</label>
+                <input type="text" class="form-control" name="username" id="exampleInputEmail1" aria-describedby="emailHelp"
+                    placeholder="Enter username" required>
+            </div>
+
+            <div class="form-group text-left">
+                <label for="exampleInputPassword1">Password</label>
+                <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password" required>
+            </div>
+
+            <p>Don't have an account? <a href="/register/">Register</a></p>
+
+            <p><a href="/forgot-password/">Forgot email or password?</a></p>
+
+            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
